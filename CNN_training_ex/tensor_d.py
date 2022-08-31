@@ -1,7 +1,49 @@
 import os
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import tensorflow as tf
+
 import shutil
 import matplotlib.pyplot as plt
+
+# 모델에 넣기 전에 이미지 증강(변형) 시켜보기
+
+'''
+전통적인 방식의 이미지 증강 방법
+
+생성기 = ImageDataGenerator(
+    rescale=1./255,
+    ratation_range=20, # 회전
+    zoom_range=0.15, # 확대
+    width_shift_range=0.2, # 이동
+    height_shift_range=0.2,
+    shear_range=0.15, # 굴절
+    horizontal_flip=True, # 가로반전
+    fill_mode='nearest')
+
+트레이닝용 = 생성기.flow_from_directory(
+    'train 데이터셋 경로',
+    class_mode = 'binary', # binary, categorical
+    shuffle = Ture,
+    seed =123,
+    color_mode = 'rgb',
+    batch_size = 64,
+    target_size = (64, 64),
+)
+
+생성기2 = ImageDataGenerator(
+    rescale=1./255)
+    
+검증용 = 생성기2.flow_from_directory(
+    'val 데이터셋 경로',
+    class_mode = 'binary', # binary, categorical
+    shuffle = Ture,
+    seed =123,
+    color_mode = 'rgb',
+    batch_size = 64,
+)
+
+model.fit(트레이닝용, validation_data=검증용
+'''
 
 def 전처리함수(i, 정답):
     i = tf.cast(i/255.0, tf.float32)
@@ -11,42 +53,24 @@ def 전처리함수(i, 정답):
 data_set_path = r'C:\Users\babymon\Desktop\데이터셋\dogs-vs-cats-redux-kernels-edition'
 data_set_flag =['train', 'validation', 'test']
 data_set_list = list()
-#
-# 이 부분은 함수로 변경하기
-# a_list = os.listdir(data_set_path)
 
-# for i in a_list:
-#     if os.path.isdir(f'{data_set_path}/{i}') and i in data_set_flag:
-#         print(f'{i} : {len(os.listdir(f"{data_set_path}/{i}"))}')
-#         data_set_list.append(f"{data_set_path}/{i}")
-#
-#
-# # 정렬 알고리즘으로 속도 올리기
-# # for i in os.listdir(data_set_list[1]):
-# #     if 'dog' in i:
-# #         shutil.move(f'{data_set_list[1]}/{i}', f'{data_set_path}/dog')
-# #     elif 'cat' in i:
-# #         shutil.move(f'{data_set_list[1]}/{i}', f'{data_set_path}/cat')
-#
-# # 데이터 전처리 하기 ((x데이터), (y데이터)) 의 shape으로 저장
+
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(f'{data_set_path}/dataset/', image_size=(64, 64), batch_size=64, subset='training', validation_split=0.2, seed=1234) # 데이터셋 경로, 이미지 리사이징, batch 지정(이미지 64개씩), 20% 만큼 vali 데이터 세팅
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(f'{data_set_path}/dataset/', image_size=(64, 64), batch_size=64, subset='validation', validation_split=0.2, seed=1234) # 동일한 시드값을 사용함으로써 training, validation 데이터 분류
-# test_ds = tf.keras.preprocessing.image_dataset_from_directory(f'{data_set_path}/dataset/', image_size=(64, 64), batch_size=64)
 #
 train_ds = train_ds.map(전처리함수)
 val_ds = val_ds.map(전처리함수)
-# test_ds = test_ds.map(전처리함수)
 #
-# print(train_ds)
-# print(val_ds)
-#
-for i, 정답 in train_ds.take(1):
-    print(i, 정답)
-#     plt.imshow(i[0].numpy().astype('uint8'))
-#     plt.show()
+# for i, 정답 in train_ds.take(1):
+#     print(i, 정답)
 
 model = tf.keras.Sequential([
-    tf.keras.layers.Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=(64, 64, 3)),
+    # 이미지 증강
+    tf.keras.layers.experimental.preprocessing.RandomFlip('horizontal', input_shape=(64, 64, 3)), # 뒤집기
+    tf.keras.layers.experimental.preprocessing.RandomRotation(0.1), # 돌리기
+    tf.keras.layers.experimental.preprocessing.RandomZoom(0.1), # 축소 확대
+
+    tf.keras.layers.Conv2D(32, (3, 3), padding='same', activation='relu'),
     tf.keras.layers.MaxPool2D((2, 2)),
     tf.keras.layers.Conv2D(64, (3, 3), padding='same', activation='relu'),
     tf.keras.layers.MaxPool2D((2, 2)),
@@ -61,20 +85,15 @@ model = tf.keras.Sequential([
 ])
 
 # 콜백함수 = tf.keras.callbacks.ModelCheckpoint(filepath='checkpoint/mnist{epoch}', monitor='val_acc', mode='max', save_weights_only=True, save_freq='epoch') # epoch 끝날때마다 val_acc 값이 max 인 weight값 저장
-콜백함수 = tf.keras.callbacks.ModelCheckpoint(filepath='checkpoint/mnist', monitor='val_acc', mode='max', save_weights_only=True, save_freq='epoch') # epoch 끝날때마다 val_acc 값이 max 인 weight값 저장
+# 콜백함수 = tf.keras.callbacks.ModelCheckpoint(filepath='checkpoint/mnist', monitor='val_acc', mode='max', save_weights_only=True, save_freq='epoch') # epoch 끝날때마다 val_acc 값이 max 인 weight값 저장
 
 # 모델 아웃라인 출력
 model.summary()
-# exit()
 
 # 2. 모델 compile
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']) # categorical_crossentropy : trainY가 원핫인코딩 되어있을때, sparse_categorical_crossentropy : trainY가 정수로 되어 있을때
 
 # 3. 모델 학습
-model.fit(train_ds, validation_data=val_ds, epochs=12, callbacks=[콜백함수]) # 데이터의 양과 질이 부족하여 최대 accuracy는 85~90% 가량
+# model.fit(train_ds, validation_data=val_ds, epochs=12, callbacks=[콜백함수])
+model.fit(train_ds, validation_data=val_ds, epochs=10)
 
-
-# model.save('model_repository/dog_cat')
-# 모델불러오기 = tf.keras.models.load_model('model_repository/dog_cat')
-# 모델불러오기.summary()
-# 모델불러오기.evaluate(test_ds)

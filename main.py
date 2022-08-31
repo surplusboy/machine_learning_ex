@@ -29,20 +29,34 @@ import numpy as np
 # d = [1, 2, 3, 4, 5, 6]
 # print(d[1::2])
 #
-a = 5
-y = 3
-
-print((a-y)**2)
-
-print((a**2)- (2*(a*y)) + y**2)
+# a = 5
+# y = 3
+#
+# print((a-y)**2)
+#
+# print((a**2)- (2*(a*y)) + y**2)
 
 
 # TensorFlow 는 파이썬 기본 자료형과 조금 다르다는 것을 알 수 있음
-case_a_list = [1,2,3,4]
-case_a_variable = 2
+# case_a_list = [1,2,3,4]
+# case_a_variable = 2
+#
+# case_b_list = [1,2,3,4]
+# case_b_variable = tf.Variable(2)
+#
+# print(case_a_list*case_a_variable)
+# print(case_b_list*case_b_variable)
 
-case_b_list = [1,2,3,4]
-case_b_variable = tf.Variable(2)
 
-print(case_a_list*case_a_variable)
-print(case_b_list*case_b_variable)
+def test_func(*args, **kwargs):
+    print(len(args))
+    if args is None:
+        test_variable = 'test'
+    else:
+        test_variable = args[0]
+    test_list = [test_variable]
+    return test_list
+
+
+a = test_func('d')
+print(a)
