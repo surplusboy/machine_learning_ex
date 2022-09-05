@@ -46,3 +46,30 @@ learning rate optimizer
 - RMSProp : AdaGrad를 제곱
 - AdaDelta : AdaGrad의 a(learning rate를) 값이 너무 작아져서 학습되지 않는걸 방지
 - Adam : RMSProp + Momentum -> 일반적으로 사용하게 되는 옵티마이저
+
+
+### RNN ###
+  
+순서가 중요한 데이터의 학습  
+뉴럴 네트워크에는 숫자형 value만 input이 되므로 단어등의 문자도 숫자로 임의 지정하여야 한다.  
+원핫 인코딩이나 문자를 정수로 변환  
+Dnese 레이어에 input 시 단어들의 순서 정보가 사라진다  
+
+
+#### simple RNN 레이어 ####
+
+자료의 순서 및 연결성이 있을때 좋은 성능을 낸다.
+
+1. Vector To Sequence
+2. Sequence To Vector
+3. Sequence To Sequence (seq to vec to seq) : 인코딩 & 디코딩
+
+문제점
+
+1. Diminishing Gradient : 레이어를 거듭 할 수록 첫 레이어의 비중이 낮아지게 됨
+
+simple RNN 의 대체 : Long Short Term Memory
+
+h1 을 포함해 cell state (장기 기억) 도 output
+
+그 외 GRU 레이어도 존재한다.
