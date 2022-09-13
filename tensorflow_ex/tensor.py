@@ -15,6 +15,7 @@ print(tf.divide(텐서1, 텐서2))
 텐서4 = tf.zeros(10) # 길이만 지정한 빈 배열 생성
 텐서5 = tf.zeros( [2, 3, 4] ) # 4개의 데이터를 담은 행렬 세개를 두개 생성 (뒤에서부터 읽으면 편함)
 
+print(텐서5)
 print(텐서5.shape)
 
 w = tf.Variable(1) # weight 생성

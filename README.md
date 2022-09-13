@@ -73,3 +73,13 @@ simple RNN 의 대체 : Long Short Term Memory
 h1 을 포함해 cell state (장기 기억) 도 output
 
 그 외 GRU 레이어도 존재한다.
+
+### GAN 모델 디자인 법 ###
+
+Generator (가짜 데이터 생성) 모델 + Discriminator (Generator의 데이터를 검증) 모델
+  
+Sequential([Generator 모델, Discriminator모델]) 의 구조
+
+GAN 트레이닝 기본 스텝
+1. Discriminator 학습 (실제 이미지와 가짜이미지 준비 → 실제,가짜의 구분 학습)
+2. Generator 학습 (랜덤 숫자 행렬 준비 및 1로 라벨링)
